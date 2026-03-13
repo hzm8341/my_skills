@@ -200,6 +200,164 @@ skill-name/
 
 ---
 
+## 🎯 实战示例：使用 skill-creator 创建 Skill
+
+下面我们通过一个完整的示例，展示如何使用 skill-creator 创建一个新的 Skill。
+
+### 示例场景
+
+假设我们要创建一个 `pdf-organizer` Skill，用于帮助用户整理PDF文件（重命名、分类、移动到对应文件夹等）。
+
+### 步骤1：启动 skill-creator
+
+```
+使用 skill-creator skill
+```
+
+skill-creator 会引导你完成以下流程：
+
+### 步骤2：理解需求
+
+skill-creator 会问你一些问题来确定Skill的功能：
+
+```
+我: 我想创建一个整理PDF文件的skill
+
+skill-creator: 好的，让我帮你创建这个skill。请回答几个问题：
+
+1. 这个skill支持什么功能？
+   - 重命名PDF文件
+   - 按日期/类型分类
+   - 移动到对应文件夹
+   - 其他？
+
+2. 能给几个具体使用例子吗？
+   - 比如："帮我把下载文件夹里的发票都移到 receipts/ 文件夹"
+   - 或者："按日期重命名这些合同PDF"
+
+3. 用户说什么时会触发这个skill？
+   - "整理PDF"
+   - "移动PDF"
+   - 等等
+```
+
+### 步骤3：初始化 Skill
+
+确定需求后，运行初始化脚本：
+
+```bash
+# 创建新skill目录
+scripts/init_skill.py pdf-organizer --path ./skills
+```
+
+这会生成以下结构：
+
+```
+pdf-organizer/
+├── SKILL.md                    # 主文件（模板）
+├── references/
+│   └── example.md              # 示例文件（可删除）
+├── scripts/
+│   └── organize.py             # 脚本示例（可删除）
+└── assets/
+    └── template.png            # 资源示例（可删除）
+```
+
+### 步骤4：编辑 SKILL.md
+
+根据需求，编辑生成的 SKILL.md：
+
+```markdown
+---
+name: pdf-organizer
+description: Use when user needs to organize, rename, move, or categorize PDF files. Examples: "organize PDFs by date", "move all invoices to receipts folder", "rename contracts by client name".
+---
+
+# PDF Organizer
+
+## 功能
+
+- 按日期整理PDF
+- 按类型/类别分类
+- 批量重命名
+- 移动到指定文件夹
+
+## 使用方法
+
+### 基本命令
+
+| 操作 | 命令 |
+|------|------|
+| 按日期整理 | `python scripts/organize.py --by-date /path/to/pdfs` |
+| 按类型分类 | `python scripts/organize.py --by-type /path/to/pdfs` |
+| 批量重命名 | `python scripts/rename.py --pattern "{date}_{title}" /path/to/pdfs` |
+
+### 示例
+
+```bash
+# 按修改日期整理
+python scripts/organize.py --by-date ~/Downloads
+
+# 将发票移动到receipts文件夹
+python scripts/organize.py --move-type invoice --dest ~/Documents/receipts
+
+# 按合同方重命名
+python scripts/rename.py --pattern "{client}_{date}" --client-map clients.csv contract/
+```
+```
+
+### 步骤5：验证并打包
+
+```bash
+# 验证skill
+scripts/package_skill.py pdf-organizer
+
+# 如果验证通过，会生成 pdf-organizer.skill 文件
+```
+
+### 完整流程图
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    skill-creator 工作流                  │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  1. 启动                                               │
+│     └─→ 使用 skill-creator skill                        │
+│                                                         │
+│  2. 理解需求                                           │
+│     ├─ 这个skill支持什么功能？                           │
+│     ├─ 给几个使用例子？                                  │
+│     └─ 什么情况下触发？                                  │
+│                                                         │
+│  3. 初始化                                             │
+│     └─→ scripts/init_skill.py <name> --path <path>    │
+│                                                         │
+│  4. 编辑                                               │
+│     ├─ 编写 SKILL.md                                    │
+│     ├─ 添加 scripts/ (可选)                              │
+│     ├─ 添加 references/ (可选)                           │
+│     └─ 添加 assets/ (可选)                              │
+│                                                         │
+│  5. 验证打包                                           │
+│     └─→ scripts/package_skill.py <skill-folder>        │
+│                                                         │
+│  6. 迭代优化                                           │
+│     └─→ 测试 → 改进 → 再次测试                          │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 常用命令速查
+
+| 命令 | 说明 |
+|------|------|
+| `init_skill.py <name>` | 创建新的skill模板 |
+| `package_skill.py <path>` | 验证并打包skill |
+| `edit_skill.py <path>` | 编辑现有skill |
+
+---
+
 ## 📥 安装说明
 
 ### 方式一：克隆到本地
