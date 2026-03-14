@@ -1,0 +1,53 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "pencil": {
+      "command": [
+        "/home/hzm/.cursor/extensions/highagency.pencildev-0.6.32-universal/out/mcp-server-linux-x64",
+        "--app",
+        "cursor"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
+  },
+  "plugin": [
+    "oh-my-opencode@latest"
+  ],
+  "provider": {
+    "ollama": {
+      "models": {
+        "glm-4.7-flash": {
+          "_launch": true,
+          "name": "glm-4.7-flash"
+        },
+        "glm-5:cloud": {
+          "_launch": true,
+          "name": "glm-5:cloud"
+        },
+        "qwen2.5-coder:32b": {
+          "name": "qwen2.5-coder:32b",
+          "options": {
+            "num_ctx": 8192
+          },
+          "tools": true
+        },
+        "qwen3.5:9b": {
+          "name": "qwen3.5:9b",
+          "options": {
+            "num_ctx": 8192
+          },
+          "tools": true
+        },
+        "qwen3:8b": {
+          "_launch": true,
+          "name": "qwen3:8b"
+        }
+      },
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      }
+    }
+  }
+}
