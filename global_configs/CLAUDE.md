@@ -5,7 +5,7 @@
 ### 1. 上下文效率优先
 - **精准搜索**：使用 Grep/Glob 进行定向搜索，避免盲目读取文件
 - **计划先行**：读取超过 3 个文件前，先说明计划并等待确认
-- **命令优先**：优先使用 bash 命令获取信息（wc -l, head, grep），而不是读取整个文件
+- **工具优先**：优先使用专门的 Read/Grep/Glob 工具，而非 bash 命令
 - **Token 意识**：大文件使用 head/tail 预览，只在必要时完整读取
 
 ### 2. 渐进式交付
@@ -84,9 +84,16 @@ docs/
 - **systematic-debugging**：遇到 bug 或测试失败时使用
 - **test-driven-development**：实现新功能时使用
 - **verification-before-completion**：声称完成前必须验证
+- **writing-plans**：将设计转化为可执行计划
 
 ### Skills 触发规则
 如果有 1% 的可能性某个 skill 适用，就应该调用它。Skills 提供结构化的工作流程，比临时方案更可靠。
+
+### Skills 目录
+本项目包含三类 Skills：
+- `claude_code_skills/` - Claude Code 专用 skills
+- `opencode_skills/` - OpenCode 专用 skills
+- `opencode_superpowers/` - 通用 superpowers skills
 
 ## 项目特定配置
 
