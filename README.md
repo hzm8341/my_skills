@@ -93,6 +93,146 @@ Superpowers是OpenCode中最强大的Skills集合，是**元技能**——帮你
 
 ---
 
+## 👥 Team 协调代理（重点！）
+
+**Team** 是最强大的协作技能——用 N 个协调代理并行完成复杂任务。
+
+### 核心特性
+
+| 特性 | 说明 |
+|------|------|
+| **N 个并行代理** | 1-20 个代理同时工作 |
+| **共享任务列表** | 基于 Claude Code 原生团队工具 |
+| **任务依赖管理** | 支持 blocks/blockedBy 依赖链 |
+| **代理通信** | 代理间通过 SendMessage 协调 |
+| **Git Worktree 隔离** | 并行代理在独立分支工作，避免冲突 |
+| **CLI Worker 混合** | 支持 Claude + Codex + Gemini 混合团队 |
+
+### 命令格式
+
+```
+/team N:agent-type "任务描述"
+/team "任务描述"                    # 自动选择代理数量
+/team ralph "任务描述"              # 结合 Ralph 持久化循环
+/team 2:codex "代码审查任务"        # 使用 Codex CLI worker
+/team 2:gemini "UI设计任务"         # 使用 Gemini CLI worker
+```
+
+### 参数说明
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| **N** | 代理数量 (1-20) | `3` = 3个代理 |
+| **agent-type** | 代理类型 | `executor`, `debugger`, `designer`, `codex`, `gemini` |
+| **ralph** | 可选修饰符 | 包装 Ralph 持久化循环 |
+
+### Agent 类型路由
+
+| 任务类型 | 推荐代理 | 原因 |
+|----------|----------|------|
+| 迭代式多步工作 | Claude teammate | 需要工具迭代 + 团队通信 |
+| 代码审查/安全审计 | CLI worker 或 specialist | 自主执行，擅长结构化分析 |
+| 架构分析/规划 | architect agent | 强分析推理 + 代码库访问 |
+| UI/前端实现 | designer agent | 设计专长 + 框架惯用语法 |
+| 大规模文档 | writer agent | 写作专长 + 大上下文一致性 |
+| 构建/测试迭代 | Claude teammate | 需要 Bash + 迭代修复循环 |
+
+### 工作流程
+
+```
+用户: "/team 3:executor 修复所有 TypeScript 错误"
+              │
+              ▼
+      [团队协调者 (Lead)]
+              │
+              ├── TeamCreate("fix-ts-errors")
+              │       → lead 成为 team-lead@fix-ts-errors
+              │
+              ├── 分析 & 分解任务
+              │       → 探索/架构产生子任务列表
+              │
+              ├── TaskCreate x N (每个子任务一个)
+              │       → 任务 #1, #2, #3 及依赖关系
+              │
+              ├── 监控循环
+              │       ← 代理发送 SendMessage (自动投递)
+              │       → SendMessage 解除阻塞/协调
+              │
+              └── 完成
+                      → SendMessage(shutdown_request) 给每个代理
+                      → TeamDelete("fix-ts-errors")
+```
+
+### 执行管道
+
+Team 执行遵循分阶段管道：
+
+`team-plan → team-prd → team-exec → team-verify → team-fix (循环)`
+
+| 阶段 | 代理 | 说明 |
+|------|------|------|
+| **team-plan** | explore + planner | 分解任务为子任务图 |
+| **team-prd** | analyst + critic | 提取需求和验收标准 |
+| **team-exec** | executor/designer/debugger | 并行执行子任务 |
+| **team-verify** | verifier + reviewers | 验证通过后进入修复循环 |
+| **team-fix** | executor/debugger | 修复缺陷后返回 exec |
+
+### 与 Claude Code 原生团队对比
+
+| 特性 | Team (本技能) | Claude Code 原生 /swarm |
+|------|--------------|------------------------|
+| **存储** | JSON in `~/.claude/teams/` | 需配置 |
+| **依赖** | 无外部依赖 | better-sqlite3 (旧版) |
+| **任务claiming** | Lead 预分配 | SQLite 事务 |
+| **通信** | SendMessage (DM/广播) | 需手动实现 |
+| **任务依赖** | 内置 blocks/blockedBy | 需手动管理 |
+| **Git Worktree** | 内置隔离支持 | 需手动处理 |
+| **CLI Worker** | Codex + Gemini 混合 | 不支持 |
+
+### Team + Ralph 组合
+
+当使用 `/team ralph` 时，Team 包装在 Ralph 的持久化循环中：
+
+- **Team orchestration** — 多代理分阶段管道
+- **Ralph persistence** — 失败重试，架构验证，迭代跟踪
+
+### 使用示例
+
+```bash
+# 基本用法 - 3个执行者修复 TypeScript 错误
+/team 3:executor "fix all TypeScript errors across the project"
+
+# 混合团队 - 2个Codex做安全审查，1个Claude做实现
+/team 3 "refactor auth module with security review"
+
+# Ralph 持久化 - 复杂任务持续迭代直到完成
+/team ralph "build a complete REST API for user management"
+
+# 使用 Codex CLI worker 做代码审查
+/team 2:codex "review architecture and suggest improvements"
+```
+
+### 阶段间 Handoff 约定
+
+阶段转换时，之前阶段的上下文（决策、拒绝的风险）需要保存到 handoff 文件：
+
+```markdown
+## Handoff: team-plan → team-exec
+- **Decided**: 微服务架构，3个服务 (auth, api, worker)。PostgreSQL 持久化，JWT 认证。
+- **Rejected**: Monolith (扩展性问题), MongoDB (团队专长是 SQL)
+- **Risks**: Worker 服务需要 Redis 队列 — 尚未配置
+- **Files**: DESIGN.md, TEST_STRATEGY.md
+- **Remaining**: 数据库迁移脚本, CI/CD 配置, Redis 配置
+```
+
+### 取消团队
+
+```bash
+使用 cancel skill  # 优雅关闭所有代理，清理状态
+```
+
+---
+
 ## 🔧 配置与管理
 
 | Skill | 说明 | 使用场景 |
