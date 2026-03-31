@@ -1,0 +1,12 @@
+# Claude Code
+.claude/settings.json
+.omc/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
